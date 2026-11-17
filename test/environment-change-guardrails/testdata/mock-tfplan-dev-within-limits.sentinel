@@ -1,0 +1,44 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.create_0": {
+		"address": "aws_instance.create_0",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_1": {
+		"address": "aws_instance.create_1",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_2": {
+		"address": "aws_instance.create_2",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_3": {
+		"address": "aws_instance.create_3",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_4": {
+		"address": "aws_instance.create_4",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+}

@@ -1,0 +1,412 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.create_0": {
+		"address": "aws_instance.create_0",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_1": {
+		"address": "aws_instance.create_1",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_2": {
+		"address": "aws_instance.create_2",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_3": {
+		"address": "aws_instance.create_3",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_4": {
+		"address": "aws_instance.create_4",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_5": {
+		"address": "aws_instance.create_5",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_6": {
+		"address": "aws_instance.create_6",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_7": {
+		"address": "aws_instance.create_7",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_8": {
+		"address": "aws_instance.create_8",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_9": {
+		"address": "aws_instance.create_9",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_10": {
+		"address": "aws_instance.create_10",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_11": {
+		"address": "aws_instance.create_11",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_12": {
+		"address": "aws_instance.create_12",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_13": {
+		"address": "aws_instance.create_13",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_14": {
+		"address": "aws_instance.create_14",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_15": {
+		"address": "aws_instance.create_15",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_16": {
+		"address": "aws_instance.create_16",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_17": {
+		"address": "aws_instance.create_17",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_18": {
+		"address": "aws_instance.create_18",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_19": {
+		"address": "aws_instance.create_19",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_20": {
+		"address": "aws_instance.create_20",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_21": {
+		"address": "aws_instance.create_21",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_22": {
+		"address": "aws_instance.create_22",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_23": {
+		"address": "aws_instance.create_23",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_24": {
+		"address": "aws_instance.create_24",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_25": {
+		"address": "aws_instance.create_25",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_26": {
+		"address": "aws_instance.create_26",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_27": {
+		"address": "aws_instance.create_27",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_28": {
+		"address": "aws_instance.create_28",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_29": {
+		"address": "aws_instance.create_29",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_30": {
+		"address": "aws_instance.create_30",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_31": {
+		"address": "aws_instance.create_31",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_32": {
+		"address": "aws_instance.create_32",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_33": {
+		"address": "aws_instance.create_33",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_34": {
+		"address": "aws_instance.create_34",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_35": {
+		"address": "aws_instance.create_35",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_36": {
+		"address": "aws_instance.create_36",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_37": {
+		"address": "aws_instance.create_37",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_38": {
+		"address": "aws_instance.create_38",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_39": {
+		"address": "aws_instance.create_39",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_40": {
+		"address": "aws_instance.create_40",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_41": {
+		"address": "aws_instance.create_41",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_42": {
+		"address": "aws_instance.create_42",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_43": {
+		"address": "aws_instance.create_43",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_44": {
+		"address": "aws_instance.create_44",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_45": {
+		"address": "aws_instance.create_45",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_46": {
+		"address": "aws_instance.create_46",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_47": {
+		"address": "aws_instance.create_47",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_48": {
+		"address": "aws_instance.create_48",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_49": {
+		"address": "aws_instance.create_49",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+	"aws_instance.create_50": {
+		"address": "aws_instance.create_50",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+		},
+	},
+}

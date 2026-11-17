@@ -1,0 +1,52 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.replace_0": {
+		"address": "aws_instance.replace_0",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete", "create"],
+		},
+	},
+	"aws_instance.replace_1": {
+		"address": "aws_instance.replace_1",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete", "create"],
+		},
+	},
+	"aws_instance.replace_2": {
+		"address": "aws_instance.replace_2",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete", "create"],
+		},
+	},
+	"aws_instance.replace_3": {
+		"address": "aws_instance.replace_3",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete", "create"],
+		},
+	},
+	"aws_instance.replace_4": {
+		"address": "aws_instance.replace_4",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete", "create"],
+		},
+	},
+	"aws_instance.replace_5": {
+		"address": "aws_instance.replace_5",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete", "create"],
+		},
+	},
+}

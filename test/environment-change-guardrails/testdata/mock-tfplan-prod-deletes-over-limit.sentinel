@@ -1,0 +1,92 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.delete_0": {
+		"address": "aws_instance.delete_0",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_1": {
+		"address": "aws_instance.delete_1",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_2": {
+		"address": "aws_instance.delete_2",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_3": {
+		"address": "aws_instance.delete_3",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_4": {
+		"address": "aws_instance.delete_4",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_5": {
+		"address": "aws_instance.delete_5",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_6": {
+		"address": "aws_instance.delete_6",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_7": {
+		"address": "aws_instance.delete_7",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_8": {
+		"address": "aws_instance.delete_8",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_9": {
+		"address": "aws_instance.delete_9",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+	"aws_instance.delete_10": {
+		"address": "aws_instance.delete_10",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["delete"],
+		},
+	},
+}

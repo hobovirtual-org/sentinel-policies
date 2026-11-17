@@ -1,0 +1,101 @@
+# environment-change-guardrails
+#
+# Limits how many resources one plan creates, deletes, replaces or changes in total, with
+# limits chosen by the workspace tag `environment`.
+#
+#   dev                      -> dev tier
+#   uat, staging, qa         -> test tier
+#   prod, no tag, anything   -> prod tier (strictest, so a missing or mistyped tag never
+#                               loosens the limits)
+#
+# Counts come from tfplan/v2 resource_changes, which carries the action list of every
+# change. Only managed resources are counted. A replacement has the actions
+# ["delete", "create"] (or ["create", "delete"]) and is counted as a replace only, so it is
+# not also counted as a create or a delete.
+
+import "tfplan/v2" as tfplan
+import "tfrun"
+
+# Limits per tier. Edit here to retune.
+limits = {
+	"dev": {
+		"creates":  100,
+		"deletes":  40,
+		"replaces": 20,
+		"total":    200,
+	},
+	"test": {
+		"creates":  50,
+		"deletes":  20,
+		"replaces": 10,
+		"total":    100,
+	},
+	"prod": {
+		"creates":  25,
+		"deletes":  10,
+		"replaces": 5,
+		"total":    50,
+	},
+}
+
+# The value of the `environment` tag binding, or null when the workspace has none.
+environment = func() {
+	for tfrun.workspace.tag_bindings else [] as binding {
+		if binding.key is "environment" {
+			return binding.value
+		}
+	}
+	return null
+}
+
+tier_for = func(env) {
+	if env is "dev" {
+		return "dev"
+	}
+	if env in ["uat", "staging", "qa"] {
+		return "test"
+	}
+	return "prod"
+}
+
+env = environment()
+tier = tier_for(env)
+limit = limits[tier]
+
+managed_changes = filter tfplan.resource_changes as _, rc {
+	rc.mode is "managed"
+}
+
+creates = filter managed_changes as _, rc {
+	rc.change.actions is ["create"]
+}
+
+deletes = filter managed_changes as _, rc {
+	rc.change.actions is ["delete"]
+}
+
+replaces = filter managed_changes as _, rc {
+	rc.change.actions is ["delete", "create"] or rc.change.actions is ["create", "delete"]
+}
+
+# Every managed change that does something: create, update, delete or replace.
+total_changes = filter managed_changes as _, rc {
+	rc.change.actions is not ["no-op"] and rc.change.actions is not ["read"]
+}
+
+check = func(name, count, max) {
+	ok = count <= max
+	if not ok {
+		print("Plan rejected for tier", tier, "(environment tag:", env, "):", name, count, "exceeds the limit of", max)
+	}
+	return ok
+}
+
+creates_ok = rule { check("creates", length(creates), limit["creates"]) }
+deletes_ok = rule { check("deletes", length(deletes), limit["deletes"]) }
+replaces_ok = rule { check("replaces", length(replaces), limit["replaces"]) }
+total_ok = rule { check("total changes", length(total_changes), limit["total"]) }
+
+main = rule {
+	creates_ok and deletes_ok and replaces_ok and total_ok
+}

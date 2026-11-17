@@ -1,0 +1,8 @@
+workspace = {
+	"name": "guardrails-test",
+	"tag_bindings": [
+		{"key": "app", "value": "guardrails-test", "inherited": false},
+		{"key": "cloud_provider", "value": "aws", "inherited": false},
+		{"key": "environment", "value": "staging", "inherited": false},
+	],
+}
