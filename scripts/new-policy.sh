@@ -1,16 +1,26 @@
 #!/usr/bin/env bash
-# Scaffold a new HCP Terraform policy set with one policy and one passing test.
+# Scaffold a new policy set with one policy and one passing test.
 #
-# Usage: scripts/new-policy.sh <name>
-# Creates terraform/<name>; the HCP Terraform policies path is terraform/<name>.
+# Usage: scripts/new-policy.sh <terraform|vault> <name>
+#   terraform: policy set delivered by HCP Terraform (policies path terraform/<name>)
+#   vault:     policy set delivered to Vault Enterprise as EGP/RGP policies
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-  echo "usage: $0 <name>" >&2
+if [[ $# -ne 2 ]]; then
+  echo "usage: $0 <terraform|vault> <name>" >&2
   exit 2
 fi
 
-name="$1"
+target="$1"
+name="$2"
+
+case "${target}" in
+  terraform | vault) ;;
+  *)
+    echo "error: target must be 'terraform' or 'vault'" >&2
+    exit 2
+    ;;
+esac
 
 if [[ ! "${name}" =~ ^[a-z][a-z0-9-]{0,62}$ ]]; then
   echo "error: name must be lowercase letters, digits and hyphens, starting with a letter" >&2
@@ -18,10 +28,10 @@ if [[ ! "${name}" =~ ^[a-z][a-z0-9-]{0,62}$ ]]; then
 fi
 
 root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-dir="${root}/terraform/${name}"
+dir="${root}/${target}/${name}"
 
 if [[ -e "${dir}" ]]; then
-  echo "error: terraform/${name} already exists" >&2
+  echo "error: ${target}/${name} already exists" >&2
   exit 1
 fi
 
@@ -53,5 +63,5 @@ test {
 }
 EOF
 
-echo "created terraform/${name}"
+echo "created ${target}/${name}"
 echo "next: replace the placeholder rule, add failing test cases, then run 'make ci'"

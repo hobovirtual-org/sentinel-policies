@@ -2,3 +2,15 @@
 *.log
 .tools/
 .sentinel/
+
+# Terraform state and local variable files (may contain secrets). Examples stay tracked.
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+*.hclic
+.local/

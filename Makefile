@@ -5,8 +5,8 @@ SHELL := /usr/bin/env bash
 # Use the pinned CLI from `make tools` when present, otherwise the one on PATH.
 SENTINEL := $(or $(abspath $(wildcard .tools/bin/sentinel)),sentinel)
 
-# A policy set is any folder under terraform/ that has a sentinel.hcl.
-SETS := $(patsubst %/sentinel.hcl,%,$(wildcard terraform/*/sentinel.hcl))
+# A policy set is any folder under terraform/ or vault/ that has a sentinel.hcl.
+SETS := $(patsubst %/sentinel.hcl,%,$(wildcard terraform/*/sentinel.hcl vault/*/sentinel.hcl))
 
 .PHONY: help tools fmt test gen ci new-policy
 
@@ -32,5 +32,5 @@ test: ## Run sentinel test in every policy set
 
 ci: fmt test ## Everything CI runs, in order
 
-new-policy: ## Scaffold a policy set: make new-policy NAME=my-policy
-	@scripts/new-policy.sh "$(NAME)"
+new-policy: ## Scaffold a policy set: make new-policy TARGET=terraform|vault NAME=my-policy
+	@scripts/new-policy.sh "$(TARGET)" "$(NAME)"

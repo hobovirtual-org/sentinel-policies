@@ -1,0 +1,249 @@
+# ============================================================================
+# pki_cmpv2_sign_verbatim.sentinel
+#
+# EGP policy for the PKI sign-verbatim endpoint used with CMPv2 certificate
+# lifecycle management.
+#
+# Enforces subject DN fixed values, CN pattern, UID format (LI certs),
+# extendedKeyUsage, and SAN constraints to reduce blast radius while
+# sign-verbatim remains in use as an interim measure.
+#
+# Bind this policy to:   pki/cmp  (or your mount path)
+# Enforcement level:     hard-mandatory
+#
+# Required Sentinel params (injected at bind time - see params.json):
+#   allowed_countries         list of string   e.g. ["CA"]
+#   allowed_organizations     list of string   e.g. ["AcmeCorp"]
+#   allowed_org_units         list of string   e.g. ["Platform Security"]
+#   allowed_states            list of string   e.g. ["ON","QC"]
+#   allowed_localities        list of string   e.g. ["Toronto","Montreal"]
+#   allowed_email             string           e.g. "ops@example.com"
+#   cn_regex                  string           regex the CN must fully match
+#   uid_regex                 string           regex for UID field (LI certs)
+#   li_cn_prefix              string           CN prefix that identifies an LI cert
+#   required_eku              list of string   required EKU values
+#   require_dns_san_match     bool             require SAN DNS.1 to equal CN
+#   dns_san_regexes           list of string   optional regexes for DNS SAN values
+#   require_uri_sans          bool             require at least one URI SAN
+#   uri_san_regex             string           optional regex for each URI SAN
+#   san_uri_prefix            string           required URI SAN prefix
+#   max_san_entries           int              max total SAN entries allowed
+# ============================================================================
+
+import "strings"
+import "types"
+import "request"
+
+# ---------------------------------------------------------------------------
+# Parameter declarations
+# ---------------------------------------------------------------------------
+param allowed_countries default []
+param allowed_organizations default []
+param allowed_org_units default []
+param allowed_states default []
+param allowed_localities default []
+param allowed_email default ""
+param cn_regex default ""
+param uid_regex default ""
+param li_cn_prefix default ""
+param required_eku default ["serverAuth", "clientAuth"]
+param require_dns_san_match default true
+param dns_san_regexes default []
+param require_uri_sans default false
+param uri_san_regex default ""
+param san_uri_prefix default ""
+param max_san_entries default 20
+
+# ---------------------------------------------------------------------------
+# get_field: safely read a scalar from a map; returns "" when absent
+# ---------------------------------------------------------------------------
+get_field = func(m, field) {
+	if types.type_of(m) is not "map" {
+		return ""
+	}
+	if field not in m {
+		return ""
+	}
+	val = m[field]
+	if types.type_of(val) is "list" {
+		if length(val) > 0 {
+			return val[0]
+		}
+		return ""
+	}
+	return string(val)
+}
+
+# ---------------------------------------------------------------------------
+# get_list: safely read a list from a map; returns [] when absent
+# ---------------------------------------------------------------------------
+get_list = func(m, field) {
+	if types.type_of(m) is not "map" {
+		return []
+	}
+	if field not in m {
+		return []
+	}
+	val = m[field]
+	if types.type_of(val) is "list" {
+		return val
+	}
+	return [string(val)]
+}
+
+# ---------------------------------------------------------------------------
+# check_subject: validates country, org, OU, state, locality, email
+# ---------------------------------------------------------------------------
+check_subject = func(d) {
+	country = get_field(d, "country")
+	org = get_field(d, "organization")
+	ou = get_field(d, "organizational_unit")
+	state = get_field(d, "province")
+	locality = get_field(d, "locality")
+	email = get_field(d, "email_address")
+
+	if country not in allowed_countries {
+		return false
+	}
+	if org not in allowed_organizations {
+		return false
+	}
+	if ou not in allowed_org_units {
+		return false
+	}
+	if state not in allowed_states {
+		return false
+	}
+	if locality not in allowed_localities {
+		return false
+	}
+	if allowed_email is not "" and email is not allowed_email {
+		return false
+	}
+	return true
+}
+
+# ---------------------------------------------------------------------------
+# check_cn: CN must fully match cn_regex when set
+# ---------------------------------------------------------------------------
+check_cn = func(d) {
+	if cn_regex is "" {
+		return true
+	}
+	cn = get_field(d, "common_name")
+	return cn matches cn_regex
+}
+
+# ---------------------------------------------------------------------------
+# check_san_dns: SAN DNS.1 must equal CN when require_dns_san_match is set;
+# per-index DNS SAN regex validation
+# ---------------------------------------------------------------------------
+check_san_dns = func(d) {
+	cn = get_field(d, "common_name")
+	dns = get_list(d, "alt_names")
+
+	if require_dns_san_match {
+		if length(dns) is 0 {
+			return false
+		}
+		if dns[0] is not cn {
+			return false
+		}
+	}
+
+	if length(dns_san_regexes) > 0 {
+		idx = 0
+		for dns_san_regexes as regex {
+			if length(dns) > idx {
+				if dns[idx] not matches regex {
+					return false
+				}
+			}
+			idx = idx + 1
+		}
+	}
+
+	return true
+}
+
+# ---------------------------------------------------------------------------
+# check_san_count: total SAN entries must not exceed max_san_entries
+# ---------------------------------------------------------------------------
+check_san_count = func(d) {
+	total = length(get_list(d, "alt_names")) +
+		length(get_list(d, "ip_sans")) +
+		length(get_list(d, "uri_sans"))
+	return total <= max_san_entries
+}
+
+# ---------------------------------------------------------------------------
+# check_eku: all required_eku values must be present
+# ---------------------------------------------------------------------------
+check_eku = func(d) {
+	eku = get_list(d, "ext_key_usage")
+	for required_eku as req_val {
+		if req_val not in eku {
+			return false
+		}
+	}
+	return true
+}
+
+# ---------------------------------------------------------------------------
+# check_uri_sans: URI SAN presence, prefix, and regex constraints
+# ---------------------------------------------------------------------------
+check_uri_sans = func(d) {
+	uris = get_list(d, "uri_sans")
+
+	if require_uri_sans and length(uris) is 0 {
+		return false
+	}
+
+	for uris as uri {
+		if san_uri_prefix is not "" {
+			if not strings.has_prefix(uri, san_uri_prefix) {
+				return false
+			}
+		}
+		if uri_san_regex is not "" {
+			if uri not matches uri_san_regex {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+# ---------------------------------------------------------------------------
+# check_uid: UID required and must match uid_regex for LI certificates
+# ---------------------------------------------------------------------------
+check_uid = func(d) {
+	cn = get_field(d, "common_name")
+	uid = get_field(d, "uid")
+	is_li = li_cn_prefix is not "" and strings.has_prefix(cn, li_cn_prefix)
+
+	if not is_li {
+		return true
+	}
+	if uid is "" {
+		return false
+	}
+	if uid_regex is not "" and uid not matches uid_regex {
+		return false
+	}
+	return true
+}
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+main = rule {
+	check_subject(request.data) and
+	check_cn(request.data) and
+	check_san_dns(request.data) and
+	check_san_count(request.data) and
+	check_eku(request.data) and
+	check_uri_sans(request.data) and
+	check_uid(request.data)
+}
