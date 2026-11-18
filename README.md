@@ -1,6 +1,6 @@
 # sentinel-policies
 
-**Sentinel policy sets for HCP Terraform that need the whole plan.** They limit how many resources one run creates, deletes or replaces, which per-resource policies in [`tf-policies`](https://github.com/hobovirtual-org/tf-policies) (Terraform Policy) cannot express.
+**Sentinel policy sets for HCP Terraform that need the whole plan.** They cover rules that per-resource policies in [`tf-policies`](https://github.com/hobovirtual-org/tf-policies) (Terraform Policy) cannot express, such as limiting how many resources one run changes.
 
 ![Sentinel](https://img.shields.io/badge/Sentinel-0.41.0-7A3FF2)
 ![Status](https://img.shields.io/badge/Status-draft-57606a)
@@ -9,22 +9,35 @@
 
 | | |
 | --- | --- |
-| Policy set | `environment-change-guardrails` |
-| Config | [`sentinel.hcl`](sentinel.hcl) |
-| Policy | [`environment-change-guardrails.sentinel`](environment-change-guardrails.sentinel) |
-| Enforcement level | `advisory` until the rollout is complete |
-| Imports | `tfplan/v2`, `tfrun` |
-| Tests | 14 scenarios in [`test/environment-change-guardrails/`](test/environment-change-guardrails) |
+| Scope | HCP Terraform policy sets, Sentinel framework |
+| Layout | One folder per policy set under [`terraform/`](terraform), each with its own `sentinel.hcl` |
+| Policy sets | [`terraform/change-guardrails`](terraform/change-guardrails) |
+| Vault Enterprise policies | [`vault-sentinel-policies`](https://github.com/hobovirtual-org/vault-sentinel-policies) |
+| CI | `make ci`: format check and tests for every set |
 
-## Why Sentinel
+## Policy sets
 
-Terraform Policy evaluates one resource at a time and has no plan object, so a rule such as "no more than 25 creates in one run" is not expressible. On a real run the count also becomes unknown, because attributes such as `id` are unknown for new resources. Sentinel's `tfplan/v2` import carries every change with its action list, so the counts do not depend on computed values.
+| Set | Policies path | What it does | Enforcement |
+| --- | --- | --- | --- |
+| [`change-guardrails`](terraform/change-guardrails) | `terraform/change-guardrails` | Caps creates, deletes, replaces and total changes per run, by workspace `environment` tag | `advisory` |
+
+## Layout
+
+```
+terraform/<set>/
+├── sentinel.hcl            policy set config, read by HCP Terraform
+├── <policy>.sentinel
+└── test/<policy>/*.hcl     sentinel test cases and mocks
+scripts/                    install-sentinel.sh, new-policy.sh, gen-test-data.py
+```
+
+HCP Terraform loads one policy set from one folder, the Policies path. Each folder under `terraform/` is a separate set with its own enforcement levels and workspace scope. The repository root is not a policy set.
 
 ## Quick Start
 
 ```bash
 make tools   # install the pinned Sentinel CLI, checksum and GPG verified
-make ci      # format check and tests
+make ci      # format check and tests for every policy set
 ```
 
 ## Prerequisites
@@ -32,45 +45,28 @@ make ci      # format check and tests
 - `make`, `python3`, `curl`, `gpg`, `unzip` (for `make tools`)
 - A Sentinel CLI on `PATH`, or the one installed by `make tools`
 
-## Limits
+## Make targets
 
-The environment comes from the workspace tag `environment`, read from `tfrun.workspace.tag_bindings`.
+| Target | Description |
+| --- | --- |
+| `make tools` | Install the pinned Sentinel CLI |
+| `make fmt` | Check formatting of every `.sentinel` file in every set |
+| `make test` | Run `sentinel test` in every set |
+| `make gen` | Regenerate mocks and test cases from `scripts/gen-test-data.py` |
+| `make ci` | `fmt` then `test`, as CI runs them |
+| `make new-policy` | Scaffold a set: `make new-policy NAME=my-policy` |
 
-| Tier | Tag value | Creates | Deletes | Replaces | Total changes |
-| --- | --- | --- | --- | --- | --- |
-| `dev` | `dev` | 100 | 40 | 20 | 200 |
-| `test` | `uat`, `staging`, `qa` | 50 | 20 | 10 | 100 |
-| `prod` | `prod`, no tag, or any other value | 25 | 10 | 5 | 50 |
+## Add a policy set
 
-- An untagged workspace or an unknown value gets the strictest tier, so a mistyped tag tightens the limits.
-- Only `managed` resources are counted. `no-op` and `read` changes are not.
-- A replacement (`["delete", "create"]`) counts as a replace only, not also as a create and a delete.
-- Total changes is every managed change that is not `no-op` or `read`.
+```bash
+make new-policy NAME=my-policy
+make ci
+```
 
-The limits are in `limits` at the top of the policy file. They apply to the whole policy set, not per workspace.
-
-## Attaching to workspaces
-
-Create the policy set in HCP Terraform (Settings, Policy Sets) with the policy framework set to Sentinel, this repository as the VCS source, and the repository root as the policies path. Scope it by workspace tag, for example `environment = dev`. Tag scoping and explicit workspace attachment are mutually exclusive on one policy set.
+This creates `terraform/my-policy/` with a placeholder rule and one passing test. Replace the rule, add failing cases, then attach the set in HCP Terraform with Policies path `terraform/my-policy`. Start at `advisory`.
 
 > [!IMPORTANT]
-> `sentinel.hcl` sets `enforcement_level = "advisory"`. Raise it to `soft-mandatory`, then `hard-mandatory`, only after the reported counts have been compared with real plans.
-
-## Rollout
-
-| Stage | Enforcement level | Scope | Exit criteria |
-| --- | --- | --- | --- |
-| 1. Pilot | `advisory` | `guardrails-test-dev` | Counts match the plan |
-| 2. Pilot | `advisory` | `guardrails-test-prod` | Counts match the plan |
-| 3. Wide | `advisory` | Tag or project | Failures understood and owned |
-| 4. Enforce | `soft-mandatory`, then `hard-mandatory` | Tag or project | Overrides are rare |
-
-## Testing
-
-Tests use mocks of `tfplan/v2` and `tfrun`, generated by [`scripts/gen-test-data.py`](scripts/gen-test-data.py). Change a scenario there and run `make gen` before `make test`.
-
-> [!WARNING]
-> The mocks follow the documented import shapes, not a real exported plan. Compare the first advisory results on `guardrails-test-dev` with the real plan before relying on the counts.
+> Every set needs its own policy set in HCP Terraform (Settings, Policy Sets) with the Policies path set to its folder. A set pointing at the repository root finds no `sentinel.hcl` and fails to load.
 
 ## Contributing & License
 
