@@ -1,0 +1,18 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.a": {
+		"address": "aws_instance.a",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["no-op"],
+			"after": {
+				"instance_type": "m5.24xlarge",
+				"tags":          null,
+				"tags_all":      null,
+			},
+			"after_unknown": {},
+		},
+	},
+}
