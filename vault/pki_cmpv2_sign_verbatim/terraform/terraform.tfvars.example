@@ -1,0 +1,12 @@
+# Copy this file to terraform.tfvars and fill in your values.
+# VAULT_TOKEN must be set as an environment variable (export VAULT_TOKEN=...).
+
+vault_addr      = "https://your-vault-hostname"   # required — Vault server URL
+vault_namespace = ""                               # set to your namespace, e.g. "test"; leave empty for root
+
+# Optional overrides — defaults shown
+# pki_mount       = "pki"
+# pki_role        = "cmpv2-role"
+# cert_auth_mount = "cert-cmpv2"
+# egp_policy_name = "pki-cmpv2-sign-verbatim"
+# acl_policy_name = "pki-cmpv2-sign-verbatim"

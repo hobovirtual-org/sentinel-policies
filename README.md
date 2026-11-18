@@ -1,6 +1,6 @@
 # sentinel-policies
 
-**Sentinel policy sets for HCP Terraform that need the whole plan.** They limit how many resources one run creates, deletes or replaces, which per-resource policies in [`tf-policies`](https://github.com/hobovirtual-org/tf-policies) (Terraform Policy) cannot express.
+**Central repository for Sentinel policies: HCP Terraform policy sets and Vault Enterprise EGP policies.** HCP Terraform policy sets cover rules that per-resource policies in [`tf-policies`](https://github.com/hobovirtual-org/tf-policies) (Terraform Policy) cannot express. The Vault policies guard requests inside Vault.
 
 ![Sentinel](https://img.shields.io/badge/Sentinel-0.41.0-7A3FF2)
 ![Status](https://img.shields.io/badge/Status-draft-57606a)
@@ -9,69 +9,121 @@
 
 | | |
 | --- | --- |
-| Policy set | `environment-change-guardrails` |
-| Config | [`sentinel.hcl`](sentinel.hcl) |
-| Policy | [`environment-change-guardrails.sentinel`](environment-change-guardrails.sentinel) |
-| Enforcement level | `advisory` until the rollout is complete |
-| Imports | `tfplan/v2`, `tfrun` |
-| Tests | 14 scenarios in [`test/environment-change-guardrails/`](test/environment-change-guardrails) |
+| Layout | One folder per policy set, under [`terraform/`](terraform) or [`vault/`](vault) |
+| HCP Terraform sets | [`terraform/change-guardrails`](terraform/change-guardrails) |
+| Vault Enterprise policies | [`vault/pki_cmpv2_sign_verbatim`](vault/pki_cmpv2_sign_verbatim) |
+| CI | `make ci` for every set, plus `terraform validate` for the Vault deployment modules |
 
-## Why Sentinel
+## Policy sets
 
-Terraform Policy evaluates one resource at a time and has no plan object, so a rule such as "no more than 25 creates in one run" is not expressible. On a real run the count also becomes unknown, because attributes such as `id` are unknown for new resources. Sentinel's `tfplan/v2` import carries every change with its action list, so the counts do not depend on computed values.
+### HCP Terraform
+
+| Set | Policies path | What it does | Enforcement |
+| --- | --- | --- | --- |
+| [`change-guardrails`](terraform/change-guardrails) | `terraform/change-guardrails` | Caps creates, deletes, replaces and total changes per run, by workspace `environment` tag | `advisory` |
+
+### Vault Enterprise
+
+| Policy | What it does | Enforcement |
+| --- | --- | --- |
+| [`pki_cmpv2_sign_verbatim`](vault/pki_cmpv2_sign_verbatim) | EGP guardrail for Vault PKI CMPv2: subject DN, CN regex, EKU and SAN constraints | `hard-mandatory` |
+
+## Layout
+
+```text
+terraform/<set>/
+├── sentinel.hcl            policy set config, read by HCP Terraform
+├── <policy>.sentinel
+└── test/<policy>/*.hcl     sentinel test cases and mocks
+vault/<policy>/
+├── sentinel.hcl            test configuration for sentinel test
+├── <policy>.sentinel       EGP source
+├── acl.hcl                 Vault ACL policy for the clients
+├── test/<policy>/*.hcl
+└── terraform/              deploys the EGP to Vault
+scripts/                    install-sentinel.sh, new-policy.sh, gen-test-data.py
+```
+
+`make test` runs `sentinel test` in every folder that has a `sentinel.hcl`, so both kinds of set are tested the same way.
 
 ## Quick Start
 
 ```bash
 make tools   # install the pinned Sentinel CLI, checksum and GPG verified
-make ci      # format check and tests
+make ci      # format check and tests for every policy set
 ```
 
 ## Prerequisites
 
 - `make`, `python3`, `curl`, `gpg`, `unzip` (for `make tools`)
 - A Sentinel CLI on `PATH`, or the one installed by `make tools`
+- Terraform >= 1.14.0 and Vault Enterprise >= 1.18, only to deploy a Vault policy
 
-## Limits
+## Make targets
 
-The environment comes from the workspace tag `environment`, read from `tfrun.workspace.tag_bindings`.
+| Target | Description |
+| --- | --- |
+| `make tools` | Install the pinned Sentinel CLI |
+| `make fmt` | Check formatting of every `.sentinel` file in every set |
+| `make test` | Run `sentinel test` in every set |
+| `make gen` | Regenerate the `terraform/change-guardrails` mocks from `scripts/gen-test-data.py` |
+| `make ci` | `fmt` then `test`, as CI runs them |
+| `make new-policy` | Scaffold a set: `make new-policy TARGET=terraform NAME=my-policy` |
 
-| Tier | Tag value | Creates | Deletes | Replaces | Total changes |
-| --- | --- | --- | --- | --- | --- |
-| `dev` | `dev` | 100 | 40 | 20 | 200 |
-| `test` | `uat`, `staging`, `qa` | 50 | 20 | 10 | 100 |
-| `prod` | `prod`, no tag, or any other value | 25 | 10 | 5 | 50 |
+## HCP Terraform policy sets
 
-- An untagged workspace or an unknown value gets the strictest tier, so a mistyped tag tightens the limits.
-- Only `managed` resources are counted. `no-op` and `read` changes are not.
-- A replacement (`["delete", "create"]`) counts as a replace only, not also as a create and a delete.
-- Total changes is every managed change that is not `no-op` or `read`.
+HCP Terraform loads one policy set from one folder, the Policies path. Each folder under `terraform/` is a separate set with its own enforcement levels and workspace scope. The repository root is not a policy set.
 
-The limits are in `limits` at the top of the policy file. They apply to the whole policy set, not per workspace.
+```bash
+make new-policy TARGET=terraform NAME=my-policy
+make ci
+```
 
-## Attaching to workspaces
-
-Create the policy set in HCP Terraform (Settings, Policy Sets) with the policy framework set to Sentinel, this repository as the VCS source, and the repository root as the policies path. Scope it by workspace tag, for example `environment = dev`. Tag scoping and explicit workspace attachment are mutually exclusive on one policy set.
+This creates `terraform/my-policy/` with a placeholder rule and one passing test. Replace the rule, add failing cases, then attach the set in HCP Terraform with Policies path `terraform/my-policy`. Start at `advisory`.
 
 > [!IMPORTANT]
-> `sentinel.hcl` sets `enforcement_level = "advisory"`. Raise it to `soft-mandatory`, then `hard-mandatory`, only after the reported counts have been compared with real plans.
+> Every set needs its own policy set in HCP Terraform (Settings, Policy Sets) with the Policies path set to its folder. A set pointing at the repository root finds no `sentinel.hcl` and fails to load.
 
-## Rollout
+## Vault policies
 
-| Stage | Enforcement level | Scope | Exit criteria |
-| --- | --- | --- | --- |
-| 1. Pilot | `advisory` | `guardrails-test-dev` | Counts match the plan |
-| 2. Pilot | `advisory` | `guardrails-test-prod` | Counts match the plan |
-| 3. Wide | `advisory` | Tag or project | Failures understood and owned |
-| 4. Enforce | `soft-mandatory`, then `hard-mandatory` | Tag or project | Overrides are rare |
+HCP Terraform does not serve these. Vault evaluates Sentinel itself, with the policy bound to request paths (EGP) or identities (RGP) through Vault's own API. The deployment module in each `vault/<policy>/terraform/` does that for its policy. Each policy folder has a README with its deploy steps.
 
-## Testing
+```bash
+make new-policy TARGET=vault NAME=my-policy
+make ci
+```
 
-Tests use mocks of `tfplan/v2` and `tfrun`, generated by [`scripts/gen-test-data.py`](scripts/gen-test-data.py). Change a scenario there and run `make gen` before `make test`.
+This creates `vault/my-policy/` with a placeholder rule and one passing test. It does not create `acl.hcl` or a `terraform/` module. Copy those from [`vault/pki_cmpv2_sign_verbatim`](vault/pki_cmpv2_sign_verbatim) when the policy needs them.
 
-> [!WARNING]
-> The mocks follow the documented import shapes, not a real exported plan. Compare the first advisory results on `guardrails-test-dev` with the real plan before relying on the counts.
+> [!IMPORTANT]
+> `terraform.tfvars` and Terraform state are gitignored. Never commit them. Commit `terraform.tfvars.example` only.
+
+### Vault EGP Sentinel dialect
+
+Vault's EGP runtime enforces a restricted subset of Sentinel. `sentinel test` accepts more than Vault does, so a passing test does not prove the policy loads.
+
+- Only `func` definitions and `main = rule { ... }` are allowed. No named `rule` blocks.
+- No variable assignments inside `main = rule { ... }`. Pass `request.data` directly to functions.
+- No module-scope assignments that call functions accessing `request`. `request` is only valid inside function bodies at runtime.
+- `for ... as`, `if/return` and multi-line arithmetic inside `func` bodies are supported.
+- Vault Enterprise `sys/policies/egp` does not inject parameters at runtime. Set values as `param ... default ...` in the policy source.
+
+To check that a policy compiles against Vault before applying it:
+
+```bash
+VAULT_ADDR="..." VAULT_NAMESPACE="..." VAULT_TOKEN="..." \
+  vault write sys/policies/egp/test-parse \
+    policy="$(base64 < vault/<policy>/<policy>.sentinel | tr -d '\n')" \
+    paths="pki/cmp" enforcement_level="advisory"
+vault delete sys/policies/egp/test-parse
+```
+
+## Security
+
+- Do not commit secrets, Vault tokens, licenses, private keys or environment files.
+- Use scoped credentials and environment variables for local work and automation.
+- Do not report vulnerabilities in public issues. Report them privately to the maintainers through your organization's approved security reporting channel.
 
 ## Contributing & License
 
-Open a PR. CI runs `make ci`. MPL-2.0.
+Open a PR. CI runs `make ci`.

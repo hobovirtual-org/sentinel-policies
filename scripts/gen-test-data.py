@@ -9,7 +9,8 @@ import pathlib
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 POLICY = "environment-change-guardrails"
-CASES = ROOT / "test" / POLICY
+POLICY_SET = ROOT / "terraform" / "change-guardrails"
+CASES = POLICY_SET / "test" / POLICY
 DATA = CASES / "testdata"
 
 ACTIONS = {
