@@ -10,7 +10,7 @@
 | | |
 | --- | --- |
 | Layout | One folder per policy set, under [`terraform/`](terraform) or [`vault/`](vault) |
-| HCP Terraform sets | [`terraform/change-guardrails`](terraform/change-guardrails) |
+| HCP Terraform sets | [`terraform/aws-ec2-standards`](terraform/aws-ec2-standards), [`terraform/change-guardrails`](terraform/change-guardrails) |
 | Vault Enterprise policies | [`vault/pki_cmpv2_sign_verbatim`](vault/pki_cmpv2_sign_verbatim) |
 | CI | `make ci` for every set, plus `terraform validate` for the Vault deployment modules |
 
@@ -20,6 +20,7 @@
 
 | Set | Policies path | What it does | Enforcement |
 | --- | --- | --- | --- |
+| [`aws-ec2-standards`](terraform/aws-ec2-standards) | `terraform/aws-ec2-standards` | Requires tags and an approved instance type on every `aws_instance` created or updated, by workspace `environment` tag | `advisory` |
 | [`change-guardrails`](terraform/change-guardrails) | `terraform/change-guardrails` | Caps creates, deletes, replaces and total changes per run, by workspace `environment` tag | `advisory` |
 
 ### Vault Enterprise

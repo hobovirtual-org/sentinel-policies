@@ -1,0 +1,7 @@
+workspace = {
+	"name": "ec2-standards-test",
+	"tag_bindings": [
+		{"key": "app", "value": "ec2-standards-test", "inherited": false},
+		{"key": "environment", "value": "sandbox", "inherited": false},
+	],
+}

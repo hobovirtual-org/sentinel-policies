@@ -1,0 +1,178 @@
+# aws-ec2-standards
+#
+# Every aws_instance that a plan creates or updates must
+#   - carry every tag required for its environment, with a non-empty value
+#   - use an instance type allowed for its environment
+#
+# The environment comes from the workspace tag `environment` (tfrun.workspace.tag_bindings):
+#
+#   dev                      -> dev
+#   uat, staging, qa         -> test
+#   prod                     -> prod
+#   no tag, anything else    -> strictest of each list: the prod tags and the dev types
+#
+# Tags and types are resolved separately, because the strictest tags (prod) and the strictest
+# types (dev) belong to different tiers. A missing or mistyped tag never loosens either list.
+#
+# Scope: managed aws_instance resources whose actions include "create" or "update". A
+# replacement (["delete", "create"]) therefore counts. Deletes, no-ops and data sources are
+# ignored.
+#
+# Tags are read from tags_all, which includes provider default_tags, and from tags.
+#
+# Fails closed: a missing or null tag map is a violation, and so is an instance_type that is
+# unknown at plan time, because it cannot be checked against the allowlist. A tag, or the
+# whole tag map, that is known only after apply counts as set, because nothing more can be
+# checked at plan time.
+
+import "tfplan/v2" as tfplan
+import "tfrun"
+import "types"
+
+# Edit here to retune.
+base_types = [
+	"t2.micro",
+	"t2.small",
+	"t2.medium",
+	"t3.micro",
+	"t3.small",
+	"t3.medium",
+]
+
+standards = {
+	"dev": {
+		"tags":  ["Name"],
+		"types": base_types,
+	},
+	"test": {
+		"tags":  ["Name"],
+		"types": base_types,
+	},
+	"prod": {
+		"tags": ["Name", "Owner", "CostCenter"],
+		"types": base_types + [
+			"m5.large",
+			"m5.xlarge",
+			"m5.2xlarge",
+			"m6i.large",
+			"m6i.xlarge",
+			"m6i.2xlarge",
+		],
+	},
+}
+
+# The value of the `environment` tag binding, or null when the workspace has none.
+environment = func() {
+	for tfrun.workspace.tag_bindings else [] as binding {
+		if binding.key is "environment" {
+			return binding.value
+		}
+	}
+	return null
+}
+
+# The tier for a known environment value, or null for no tag or an unknown value.
+tier_for = func(env) {
+	if env is "dev" {
+		return "dev"
+	}
+	if env in ["uat", "staging", "qa"] {
+		return "test"
+	}
+	if env is "prod" {
+		return "prod"
+	}
+	return null
+}
+
+env = environment()
+tier = tier_for(env)
+
+# Unknown tier (no tag or an unknown value): strictest tags (prod) and strictest types (dev).
+# `else` does not cover null, so the fallback is explicit.
+tags_for = func(tier) {
+	if tier is null {
+		return standards["prod"]["tags"]
+	}
+	return standards[tier]["tags"]
+}
+
+types_for = func(tier) {
+	if tier is null {
+		return standards["dev"]["types"]
+	}
+	return standards[tier]["types"]
+}
+
+mandatory_tags = tags_for(tier)
+allowed_types = types_for(tier)
+
+ec2_instances = filter tfplan.resource_changes as _, rc {
+	rc.mode is "managed" and
+		rc.type is "aws_instance" and
+		(rc.change.actions contains "create" or rc.change.actions contains "update")
+}
+
+# A tag counts as set when either tags_all (provider default_tags included) or tags holds a
+# non-empty value for it, or when the plan marks it, or the whole map, as known after apply.
+tag_is_set = func(rc, key) {
+	for ["tags_all", "tags"] as attr {
+		unknown = rc.change.after_unknown[attr] else false
+		if unknown is true {
+			return true
+		}
+		if types.type_of(unknown) is "map" and (unknown[key] else false) is true {
+			return true
+		}
+		tags = rc.change.after[attr] else null
+		if types.type_of(tags) is "map" {
+			value = tags[key] else null
+			if value is not null and value is not "" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+has_mandatory_tags = func(rc) {
+	missing = filter mandatory_tags as _, key {
+		not tag_is_set(rc, key)
+	}
+	if length(missing) > 0 {
+		print(rc.address, "is missing tags required for environment", env, ":", missing)
+		return false
+	}
+	return true
+}
+
+has_allowed_type = func(rc) {
+	instance_type = rc.change.after.instance_type else ""
+	if instance_type not in allowed_types {
+		print(rc.address, "has instance_type", instance_type, "which is not allowed for environment", env, "or not known at plan time")
+		return false
+	}
+	return true
+}
+
+# filter visits every instance, so each violation is reported, not only the first.
+tag_violations = filter ec2_instances as _, rc {
+	not has_mandatory_tags(rc)
+}
+
+type_violations = filter ec2_instances as _, rc {
+	not has_allowed_type(rc)
+}
+
+mandatory_instance_tags = rule {
+	length(tag_violations) is 0
+}
+
+instance_type_allowed = rule {
+	length(type_violations) is 0
+}
+
+main = rule {
+	mandatory_instance_tags and
+	instance_type_allowed
+}

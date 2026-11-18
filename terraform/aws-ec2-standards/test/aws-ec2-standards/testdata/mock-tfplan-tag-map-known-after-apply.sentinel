@@ -1,0 +1,20 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.a": {
+		"address": "aws_instance.a",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t3.micro",
+				"tags":          null,
+				"tags_all":      null,
+			},
+			"after_unknown": {
+				"tags_all": true,
+			},
+		},
+	},
+}

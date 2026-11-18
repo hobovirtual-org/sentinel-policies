@@ -1,0 +1,23 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.a": {
+		"address": "aws_instance.a",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {
+				"instance_type": true,
+			},
+		},
+	},
+}

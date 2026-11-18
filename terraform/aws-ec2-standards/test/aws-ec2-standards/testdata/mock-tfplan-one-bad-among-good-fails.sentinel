@@ -1,0 +1,58 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.a": {
+		"address": "aws_instance.a",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t3.micro",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+	"aws_instance.b": {
+		"address": "aws_instance.b",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "m5.large",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+	"aws_instance.c": {
+		"address": "aws_instance.c",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t3.micro",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+}

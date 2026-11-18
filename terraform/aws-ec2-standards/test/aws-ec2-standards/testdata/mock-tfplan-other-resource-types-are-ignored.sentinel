@@ -1,0 +1,18 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_launch_template.a": {
+		"address": "aws_launch_template.a",
+		"mode":    "managed",
+		"type":    "aws_launch_template",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "m5.24xlarge",
+				"tags":          null,
+				"tags_all":      null,
+			},
+			"after_unknown": {},
+		},
+	},
+}

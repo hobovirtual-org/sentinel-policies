@@ -1,0 +1,112 @@
+terraform_version = "1.17.2"
+
+resource_changes = {
+	"aws_instance.t2_micro": {
+		"address": "aws_instance.t2_micro",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t2.micro",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+	"aws_instance.t2_small": {
+		"address": "aws_instance.t2_small",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t2.small",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+	"aws_instance.t2_medium": {
+		"address": "aws_instance.t2_medium",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t2.medium",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+	"aws_instance.t3_micro": {
+		"address": "aws_instance.t3_micro",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t3.micro",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+	"aws_instance.t3_small": {
+		"address": "aws_instance.t3_small",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t3.small",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+	"aws_instance.t3_medium": {
+		"address": "aws_instance.t3_medium",
+		"mode":    "managed",
+		"type":    "aws_instance",
+		"change": {
+			"actions": ["create"],
+			"after": {
+				"instance_type": "t3.medium",
+				"tags": {
+					"Name": "web-1",
+				},
+				"tags_all": {
+					"Name": "web-1",
+				},
+			},
+			"after_unknown": {},
+		},
+	},
+}

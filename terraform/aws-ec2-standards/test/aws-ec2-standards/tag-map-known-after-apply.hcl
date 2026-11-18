@@ -1,0 +1,19 @@
+mock "tfplan/v2" {
+  module {
+    source = "testdata/mock-tfplan-tag-map-known-after-apply.sentinel"
+  }
+}
+
+mock "tfrun" {
+  module {
+    source = "testdata/mock-tfrun-dev.sentinel"
+  }
+}
+
+test {
+  rules = {
+    main                    = true
+    mandatory_instance_tags = true
+    instance_type_allowed   = true
+  }
+}
